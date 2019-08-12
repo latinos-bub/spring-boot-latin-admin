@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.latin.admin.dao.ArticleDao">
+
+    <insert id="addArticle" parameterType="com.alibaba.fastjson.JSONObject">
+        INSERT INTO ARTICLE
+            (CONTENT)
+        VALUES (#{content})
+    </insert>
+
+    <select id="countArticle" resultType="Integer">
+        SELECT count(0)
+        FROM ARTICLE W
+        WHERE W.DELETE_STATUS = '1'
+    </select>
+
+    <select id="listArticle" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT W.ID                                      ID,
+               W.CONTENT                                 CONTENT,
+               date_format(W.CREATE_TIME, '%Y.%m.%d %T') CREATETIME
+        FROM ARTICLE W
+        WHERE W.DELETE_STATUS = '1'
+        ORDER BY W.ID DESC
+        LIMIT #{offSet}, #{pageRow}
+    </select>
+
+    <update id="updateArticle" parameterType="com.alibaba.fastjson.JSONObject">
+        UPDATE ARTICLE
+        SET CONTENT = #{content}
+        WHERE ID = #{id}
+    </update>
+
+</mapper>

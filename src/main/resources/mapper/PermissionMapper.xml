@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.latin.admin.dao.PermissionDao">
+
+    <resultMap id="permissionMap" type="com.latin.admin.model.One2Many">
+        <id column="userId" property="userId"/>
+        <result column="nickname" property="nickname"/>
+        <result column="roleId" property="roleId"/>
+        <result column="roleName" property="roleName"/>
+        <collection property="menuList" ofType="String">
+            <id column="menuCode" property="menuCode"/>
+        </collection>
+        <collection property="permissionList" ofType="String">
+            <id column="permissionCode" property="permissionCode"/>
+        </collection>
+    </resultMap>
+    <select id="getUserPermission" resultMap="permissionMap">
+        SELECT U.ID              USERID,
+               U.NICKNAME        NICKNAME,
+               U.ROLE_ID         ROLEID,
+               R.ROLE_NAME       ROLENAME,
+               P.MENU_CODE       MENUCODE,
+               P.PERMISSION_CODE PERMISSIONCODE
+        FROM SYS_USER U
+                 LEFT JOIN SYS_ROLE R ON R.ID = U.ROLE_ID
+                 LEFT JOIN SYS_ROLE_PERMISSION RP ON U.ROLE_ID = RP.ROLE_ID
+                 LEFT JOIN SYS_PERMISSION P ON RP.PERMISSION_ID = P.ID AND RP.DELETE_STATUS = '1'
+        WHERE U.USERNAME = #{username}
+          AND U.DELETE_STATUS = '1'
+    </select>
+
+    <select id="getAllPermission" resultType="String">
+        SELECT P.PERMISSION_CODE PERMISSIONCODE
+        FROM SYS_PERMISSION P
+        ORDER BY P.ID
+    </select>
+    <select id="getAllMenu" resultType="String">
+        SELECT P.MENU_CODE MENUCODE
+        FROM SYS_PERMISSION P
+        ORDER BY P.ID
+    </select>
+</mapper>
