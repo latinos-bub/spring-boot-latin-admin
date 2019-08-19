@@ -56,9 +56,9 @@ public class AjaxPermissionsAuthorizationFilter extends FormAuthenticationFilter
     @Bean
     public FilterRegistrationBean registration(AjaxPermissionsAuthorizationFilter filter){
 
-        FilterRegistrationBean registrationBean = new FilterRegistrationBean(filter);
-        registrationBean.setEnabled(false);
+        FilterRegistrationBean registration = new FilterRegistrationBean(filter);
+        registration.setEnabled(false);
 
-        return registrationBean;
+        return registration;
     }
 }

@@ -2,6 +2,7 @@ package com.latin.admin;
 
 
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -22,6 +23,7 @@ public class AdminApplication extends SpringBootServletInitializer {
     public static void main(String[] args) {
 
         SpringApplication springApplication = new SpringApplication(AdminApplication.class);
+        springApplication.setBannerMode(Banner.Mode.OFF);
         springApplication.run(args);
     }
 
@@ -31,7 +33,7 @@ public class AdminApplication extends SpringBootServletInitializer {
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder){
 
-        // 注意这里要指向原先用 mian 方法执行的 Application 启动类
+        // 注意这里要指向原先用 main 方法执行的 Application 启动类
         return builder.sources(AdminApplication.class);
     }
 }

@@ -27,16 +27,70 @@ public class ShiroConfiguration {
 
 
 
+
+    /**
+     * @author: util.you.com@gmail.com
+     * @param: [securityManager]
+     * @return: org.apache.shiro.spring.web.ShiroFilterFactoryBean
+     * @date: 2019/7/29 17:08
+     * @version: 1.0
+     * @description: 设置过滤规则
+     */
+    @Bean(name = "shiroFilter")
+    public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager){
+
+        ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
+        // Shiro 的核心安全接口，这个属性是必须的
+        shiroFilterFactoryBean.setSecurityManager(securityManager);
+
+        Map<String, Filter> filterMap = new LinkedHashMap<>();
+        filterMap.put("authc", new AjaxPermissionsAuthorizationFilter());
+
+        shiroFilterFactoryBean.setFilters(filterMap);
+        shiroFilterFactoryBean.setLoginUrl("/login/auth");
+        shiroFilterFactoryBean.setSuccessUrl("/");
+        shiroFilterFactoryBean.setUnauthorizedUrl("/unauth");
+
+        /**
+         * 定义 shiro 过滤链 Map 结构
+         * Map 中 key(xml 中是指 value 值) 的第一个 '/' 代表的路径是相对于 HttpServletRequest.getContextPath（）的值来的
+         * anon: 它对应的过滤器里面是空的，什么都没做，这里 .do 和 .jsp 后面的 * 表示参数，比方说 login.jsp?main 这种
+         * authc: 该过滤器下的页面必须验证后才能访问，它是 Shiro 内置的一个拦截器
+         *      org.apache.shiro.web.filter.authc.FormAuthenticationFilter
+         */
+        Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();   // 注意此处使用的是 LinkedHashMap,是有顺序的
+        /**
+         * 过滤链定义，从上向下顺序执行，一般将 / ** 放在最下面
+         * authc: 所有 url 都必须认证通过才可以访问;
+         * anon: 所有 url 都可以匿名访问
+         */
+        filterChainDefinitionMap.put("/", "anon");
+        filterChainDefinitionMap.put("/static/**", "anon");
+        filterChainDefinitionMap.put("/login/auth", "anon");
+        filterChainDefinitionMap.put("/login/logout", "anon");
+        filterChainDefinitionMap.put("/error", "anon");
+        filterChainDefinitionMap.put("/**", "authc");
+
+        shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
+        return shiroFilterFactoryBean;
+    }
+
+
+
+
+
+
+
     /**
      * @author: util.you.com@gmail.com
      * @param: []
      * @return: org.apache.shiro.mgt.SecurityManager
      * @date: 2019/7/29 17:10
      * @version: 1.0
-     * @description: 安全管理器
+     * @description: 安全管理器 不指定名字的话，自动创建一个方法名为第一个字母小写的 bean
      */
     @Bean
-    public DefaultWebSecurityManager securityManager(){
+    public SecurityManager securityManager(){
 
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setRealm(userRealm());
@@ -62,7 +116,6 @@ public class ShiroConfiguration {
     public UserRealm userRealm(){
 
         UserRealm userRealm = new UserRealm();
-        userRealm.setCredentialsMatcher(hashedCredentialsMatcher());
         return userRealm;
     }
 
@@ -91,63 +144,11 @@ public class ShiroConfiguration {
         // 散列算法：这里使用 MD5 算法
         hashedCredentialsMatcher.setHashAlgorithmName("md5");
 //         散列的次数，比如散列两次，相当于 MD5(MD5());
-        hashedCredentialsMatcher.setHashIterations(1);
+        hashedCredentialsMatcher.setHashIterations(2);
         // storedCredentialsHexEncoded 默认是 true，此时的密码用 Hex 编码；false 时用 Base64 编码
         hashedCredentialsMatcher.setStoredCredentialsHexEncoded(true);
         return hashedCredentialsMatcher;
     }
-
-
-
-
-
-
-
-    /**
-     * @author: util.you.com@gmail.com
-     * @param: [securityManager]
-     * @return: org.apache.shiro.spring.web.ShiroFilterFactoryBean
-     * @date: 2019/7/29 17:08
-     * @version: 1.0
-     * @description: 设置过滤规则
-     */
-    @Bean
-    public ShiroFilterFactoryBean shiroFilter(SecurityManager securityManager){
-
-        ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
-        // Shiro 的核心安全接口，这个属性是必须的
-        shiroFilterFactoryBean.setSecurityManager(securityManager);
-        shiroFilterFactoryBean.setLoginUrl("/login/auth");
-        shiroFilterFactoryBean.setSuccessUrl("/");
-        shiroFilterFactoryBean.setUnauthorizedUrl("/unauth");
-
-//        Map<String, Filter> filterMap = new LinkedHashMap<>();
-//        filterMap.put("authc", new AjaxPermissionsAuthorizationFilter());
-//        shiroFilterFactoryBean.setFilters(filterMap);
-        /**
-         * 定义 shiro 过滤链 Map 结构
-         * Map 中 key(xml 中是指 value 值) 的第一个 '/' 代表的路径是相对于 HttpServletRequest.getContextPath（）的值来的
-         * anon: 它对应的过滤器里面是空的，什么都没做，这里 .do 和 .jsp 后面的 * 表示参数，比方说 login.jsp?main 这种
-         * authc: 该过滤器下的页面必须验证后才能访问，它是 Shiro 内置的一个拦截器
-         *      org.apache.shiro.web.filter.authc.FormAuthenticationFilter
-         */
-        Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();   // 注意此处使用的是 LinkedHashMap,是有顺序的
-        /**
-         * 过滤链定义，从上向下顺序执行，一般将 / ** 放在最下面
-         * authc: 所有 url 都必须认证通过才可以访问;
-         * anon: 所有 url 都可以匿名访问
-         */
-        filterChainDefinitionMap.put("/", "anon");
-        filterChainDefinitionMap.put("/static/**", "anon");
-        filterChainDefinitionMap.put("/login/auth", "anon");
-        filterChainDefinitionMap.put("/login/logout", "anon");
-        filterChainDefinitionMap.put("/error", "anon");
-        filterChainDefinitionMap.put("/**", "authc");
-
-        shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
-        return shiroFilterFactoryBean;
-    }
-
 
 
 
@@ -187,7 +188,7 @@ public class ShiroConfiguration {
      *  配置以下两个 bean(DefaultAdvisorAutoProxyCreator(可选) 和 AuthorizationAttributeSourceAdvisor) 即可实现此功能
      */
     @Bean
-    @DependsOn("lifecycleBeanPostProcessor")
+    @DependsOn({"lifecycleBeanPostProcessor"})
     public DefaultAdvisorAutoProxyCreator advisorAutoProxyCreator(){
 
         DefaultAdvisorAutoProxyCreator advisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
